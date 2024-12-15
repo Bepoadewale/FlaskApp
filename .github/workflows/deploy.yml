@@ -41,7 +41,7 @@ jobs:
       env:
         AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
-        ECR_REPOSITORY: my-ecr-repository-name
+        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
 
     - name: Deploy CloudFormation Stack
       run: |
@@ -51,9 +51,11 @@ jobs:
           --capabilities CAPABILITY_NAMED_IAM \
           --parameter-overrides ECRImageUri=${{ env.IMAGE_URI }}
       env:
+        AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
+        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
        
-    - name: Verify Deployment
+    - name: Verify Deployment 1
       run: |
         echo "Stack status:"
         aws cloudformation describe-stacks --stack-name flask-app-stack --query "Stacks[0].StackStatus" --output text
