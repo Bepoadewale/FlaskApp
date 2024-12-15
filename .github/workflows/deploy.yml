@@ -53,7 +53,7 @@ jobs:
       env:
         AWS_REGION: ${{ secrets.AWS_REGION }}
        
-    - name: Verify Deployment Here
+    - name: Verify Deployment
       run: |
         echo "Stack status:"
         aws cloudformation describe-stacks --stack-name flask-app-stack --query "Stacks[0].StackStatus" --output text
