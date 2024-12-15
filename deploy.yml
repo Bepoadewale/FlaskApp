@@ -1,0 +1,66 @@
+name: Deploy Flask App to AWS ECS with CloudFormation
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Build, Push, and Deploy to AWS ECS
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Log in to Amazon ECR
+      run: |
+        aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+    - name: Build and Push Docker Image to ECR
+      run: |
+        IMAGE_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest"
+        docker build -t $IMAGE_URI .
+        docker push $IMAGE_URI
+      env:
+        AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }} # Replace with your repository name
+
+    - name: Get ECR Image URI
+      id: get-ecr-uri
+      run: echo "IMAGE_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest" >> $GITHUB_ENV
+      env:
+        AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        ECR_REPOSITORY: my-ecr-repository-name
+
+    - name: Deploy CloudFormation Stack
+      run: |
+        aws cloudformation deploy \
+          --template-file cloudformation.yml \
+          --stack-name flask-app-stack \
+          --capabilities CAPABILITY_NAMED_IAM \
+          --parameter-overrides ECRImageUri=${{ env.IMAGE_URI }}
+      env:
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+       
+    - name: Verify Deployment
+      run: |
+        echo "Stack status:"
+        aws cloudformation describe-stacks --stack-name flask-app-stack --query "Stacks[0].StackStatus" --output text
+
+    - name: Post Deployment Logs
+      run: |
+        echo "ECS Service Logs:"
+        aws logs describe-log-streams --log-group-name /ecs/flask-app
+        aws logs get-log-events --log-group-name /ecs/flask-app --log-stream-name \
+          $(aws logs describe-log-streams --log-group-name /ecs/flask-app --query "logStreams[0].logStreamName" --output text)
