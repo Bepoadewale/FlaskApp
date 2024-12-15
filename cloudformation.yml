@@ -86,6 +86,10 @@ Resources:
           FromPort: 5000
           ToPort: 5000
           CidrIp: 0.0.0.0/0
+        - IpProtocol: HTTPS
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
 
   PublicSubnet1:
     Type: AWS::EC2::Subnet
