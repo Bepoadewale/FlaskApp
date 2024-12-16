@@ -146,6 +146,7 @@ Resources:
   FlaskAppService:
     Type: AWS::ECS::Service
     Properties:
+      ServiceName: flaskapp-service
       Cluster: !Ref FlaskAppCluster
       TaskDefinition: !Ref FlaskAppTaskDefinition
       LaunchType: FARGATE
