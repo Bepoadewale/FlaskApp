@@ -62,4 +62,4 @@ jobs:
       - name: Verify Deployment
         run: |
           echo "Stack status:"
-          aws cloudformation describe-stacks --stack-name flask-app-stack --query "Stacks[0].StackStatus" --output text
+          aws cloudformation describe-stacks --stack-name flaskapp-stack --query "Stacks[0].StackStatus" --output text
