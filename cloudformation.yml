@@ -116,6 +116,16 @@ Resources:
               - sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: CloudWatchLogsPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/ecs/flaskapp:*"
 
   # ECS Cluster
   FlaskAppCluster:
@@ -159,6 +169,45 @@ Resources:
             - !Ref FlaskAppSecurityGroup
           AssignPublicIp: ENABLED
 
+ # CloudWatch Log Group
+  FlaskAppLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /ecs/flaskapp
+      RetentionInDays: 7 # Retain logs for 7 days
+  
+  # CloudWatch Alarm for high CPU utilization
+  HighCPUUtilizationAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: HighCPUUtilization
+      MetricName: CPUUtilization
+      Namespace: AWS/ECS
+      Dimensions:
+        - Name: ServiceName
+          Value: flaskapp-service
+        - Name: ClusterName
+          Value: flaskapp-cluster
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 80
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      AlarmActions:
+        - !Ref CloudWatchSNS
+      OKActions:
+        - !Ref CloudWatchSNS
+      TreatMissingData: missing
+
+  # SNS Topic for Alarm Notifications
+  CloudWatchSNS:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: FlaskAppAlarms
+      Subscription:
+        - Protocol: email
+          Endpoint: coginni@gmail.com 
+
 Outputs:
   VpcId:
     Description: ID of the VPC
@@ -171,3 +220,11 @@ Outputs:
   SecurityGroupId:
     Description: ID of the Security Group
     Value: !Ref FlaskAppSecurityGroup
+
+  LogGroupName:
+    Description: Name of the CloudWatch Log Group
+    Value: !Ref FlaskAppLogGroup
+
+  AlarmName:
+    Description: Name of the CloudWatch Alarm
+    Value: !Ref HighCPUUtilizationAlarm
