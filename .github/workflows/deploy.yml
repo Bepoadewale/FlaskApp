@@ -56,6 +56,8 @@ jobs:
             --cluster flaskapp-cluster \
             --service FlaskAppService \
             --force-new-deployment
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
 
       - name: Verify Deployment
         run: |
