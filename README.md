@@ -6,6 +6,7 @@ Prerequisites
 3. Push the code (git push).
 
 What is Running
+
 The CloudFormation stack will create:
 1. ECS Cluster
 2. ECS Service
