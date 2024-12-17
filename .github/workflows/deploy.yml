@@ -31,23 +31,23 @@ jobs:
 
       - name: Create ECR repository    
         run: |
-          if ! aws ecr describe-repositories --repository-name zayzoon > /dev/null 2>&1; then
-            aws ecr create-repository --repository-name zayzoon
+          if ! aws ecr describe-repositories --repository-name $ECR_REPOSITORY_NAME > /dev/null 2>&1; then
+            aws ecr create-repository --repository-name $ECR_REPOSITORY_NAME
           else
-            echo "Repository zayzoon already exists, continuing..."
+            echo "Repository $ECR_REPOSITORY_NAME already exists, continuing..."
           fi
         env:
-          ECR_REPOSITORY_NAME: zayzoon
-            
+          ECR_REPOSITORY: $ECR_REPOSITORY_NAME            
+
       - name: Build and Push Docker Image
         run: |
-          IMAGE_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/zayzoon:latest"
+          IMAGE_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$ECR_REPOSITORY_NAME:latest"
           docker build -t $IMAGE_URI .
           docker push $IMAGE_URI
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          ECR_REPOSITORY: zayzoon
+          ECR_REPOSITORY: $ECR_REPOSITORY_NAME 
 
       - name: Deploy CloudFormation Stack
         run: |
@@ -58,7 +58,7 @@ jobs:
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          ECR_REPOSITORY: zayzoon
+          ECR_REPOSITORY: $ECR_REPOSITORY_NAME
 
       - name: Update ECS Service
         run: |
