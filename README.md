@@ -19,6 +19,8 @@ The CloudFormation stack will create:
 9. Public Subnets
 10. Route tables
 11. Internet Gateway 
+12. ECS Scaling Target
+13. ECS Scaling Policy
 
 CleanUp Procedure
 Run:  aws cloudformation delete-stack --stack-name flaskapp-stack
