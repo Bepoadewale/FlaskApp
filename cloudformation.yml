@@ -205,7 +205,7 @@ Resources:
     Properties:
       MaxCapacity: 10 # Maximum number of tasks
       MinCapacity: 2 # Minimum number of tasks
-      ResourceId: !Sub "service/${FlaskAppCluster}/${FlaskAppService}"
+      ResourceId: !Sub "service/flaskapp-cluster/flaskapp-service"
       RoleARN: !GetAtt ECSAutoScalingRole.Arn
       ScalableDimension: ecs:service:DesiredCount
       ServiceNamespace: ecs
