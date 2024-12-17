@@ -24,6 +24,9 @@ The GitHub Actions workflow and CloudFormation stack will create:
 14. ECR repository named "zayzoon"
 15. A docker image in the ECR repo
 
+
 CleanUp Procedure
+
 aws cloudformation delete-stack --stack-name flaskapp-stack
+
 aws ecr delete-repository --repository-name zayzoon
