@@ -7,7 +7,7 @@ Prerequisites
 
 What is Running Here
 
-The CloudFormation stack will create:
+The GitHub Actions workflow and CloudFormation stack will create:
 1. ECS Cluster
 2. ECS Service
 3. VPC
@@ -21,6 +21,10 @@ The CloudFormation stack will create:
 11. Internet Gateway 
 12. ECS Scaling Target
 13. ECS Scaling Policy
+14. ECR repository named "zayzoon"
+15. A docker image in the ECR repo
 
 CleanUp Procedure
-Run:  aws cloudformation delete-stack --stack-name flaskapp-stack
+Run:  
+    aws cloudformation delete-stack --stack-name flaskapp-stack
+    aws ecr delete-repository --repository-name zayzoon

@@ -127,6 +127,7 @@ Resources:
                   - logs:PutLogEvents
                 Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/ecs/flaskapp:*"
 
+#ECS AutoScaling Role
   ECSAutoScalingRole:
     Type: AWS::IAM::Role
     Properties:
@@ -199,17 +200,19 @@ Resources:
             - !Ref FlaskAppSecurityGroup
           AssignPublicIp: ENABLED
 
+# ECS Service Scaling Target
   ECSServiceScalingTarget:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: FlaskAppService
     Properties:
-      MaxCapacity: 10 # Maximum number of tasks
-      MinCapacity: 2 # Minimum number of tasks
+      MaxCapacity: 10 
+      MinCapacity: 2 
       ResourceId: !Sub "service/flaskapp-cluster/flaskapp-service"
       RoleARN: !GetAtt ECSAutoScalingRole.Arn
       ScalableDimension: ecs:service:DesiredCount
       ServiceNamespace: ecs
 
+# ECS Service Scaling Policy
   ECSServiceCPUScalingPolicy:
     Type: AWS::ApplicationAutoScaling::ScalingPolicy
     Properties:
@@ -219,16 +222,16 @@ Resources:
       TargetTrackingScalingPolicyConfiguration:
         PredefinedMetricSpecification:
           PredefinedMetricType: ECSServiceAverageCPUUtilization
-        TargetValue: 70 # Target average CPU utilization (70%)
-        ScaleInCooldown: 60 # Cooldown time (seconds) before scaling in
-        ScaleOutCooldown: 60 # Cooldown time (seconds) before scaling out
+        TargetValue: 70 
+        ScaleInCooldown: 60 
+        ScaleOutCooldown: 60 
 
  # CloudWatch Log Group
   FlaskAppLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: /ecs/flaskapp
-      RetentionInDays: 7 # Retain logs for 7 days
+      RetentionInDays: 7 
   
   # CloudWatch Alarm for high CPU utilization
   HighCPUUtilizationAlarm:
