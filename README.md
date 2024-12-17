@@ -25,6 +25,5 @@ The GitHub Actions workflow and CloudFormation stack will create:
 15. A docker image in the ECR repo
 
 CleanUp Procedure
-Run:  
-    aws cloudformation delete-stack --stack-name flaskapp-stack
-    aws ecr delete-repository --repository-name zayzoon
+aws cloudformation delete-stack --stack-name flaskapp-stack
+aws ecr delete-repository --repository-name zayzoon
