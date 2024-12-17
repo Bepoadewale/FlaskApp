@@ -5,7 +5,7 @@ Prerequisites
 2. Input secrets into the GitHub repository's secrets (aws secret access key, aws access key id, aws region, aws account id).
 3. Push the code (git push).
 
-What is Running
+What is Running Here
 
 The CloudFormation stack will create:
 1. ECS Cluster
