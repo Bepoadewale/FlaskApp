@@ -30,9 +30,15 @@ jobs:
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
       - name: Create ECR repository    
-        run:   
-          aws ecr create-repository --repository-name zayzoon
-    
+        run: |
+          if ! aws ecr describe-repositories --repository-name zayzoon > /dev/null 2>&1; then
+            aws ecr create-repository --repository-name zayzoon
+          else
+            echo "Repository zayzoon already exists, continuing..."
+          fi
+        env:
+          ECR_REPOSITORY_NAME: zayzoon
+            
       - name: Build and Push Docker Image
         run: |
           IMAGE_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/zayzoon:latest"
