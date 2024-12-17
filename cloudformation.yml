@@ -127,6 +127,58 @@ Resources:
                   - logs:PutLogEvents
                 Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/ecs/flaskapp:*"
 
+  ECSAutoScalingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - application-autoscaling.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: AutoScalingECSServicePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecs:UpdateService
+                  - ecs:DescribeServices
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - cloudwatch:PutMetricAlarm
+                  - cloudwatch:DescribeAlarms
+                  - cloudwatch:DeleteAlarms
+                Resource: "*"
+
+  ECSServiceScalingTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MaxCapacity: 10 # Maximum number of tasks
+      MinCapacity: 2 # Minimum number of tasks
+      ResourceId: !Sub "service/${FlaskAppCluster}/${FlaskAppService}"
+      RoleARN: !GetAtt ECSAutoScalingRole.Arn
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+
+  ECSServiceCPUScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: ECSServiceCPUScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref ECSServiceScalingTarget
+      TargetTrackingScalingPolicyConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ECSServiceAverageCPUUtilization
+        TargetValue: 70 # Target average CPU utilization (70%)
+        ScaleInCooldown: 60 # Cooldown time (seconds) before scaling in
+        ScaleOutCooldown: 60 # Cooldown time (seconds) before scaling out
+
   # ECS Cluster
   FlaskAppCluster:
     Type: AWS::ECS::Cluster
@@ -160,6 +212,7 @@ Resources:
       Cluster: !Ref FlaskAppCluster
       TaskDefinition: !Ref FlaskAppTaskDefinition
       LaunchType: FARGATE
+      DesiredCount: 2
       NetworkConfiguration:
         AwsvpcConfiguration:
           Subnets:
@@ -189,9 +242,9 @@ Resources:
         - Name: ClusterName
           Value: flaskapp-cluster
       Statistic: Average
-      Period: 300
+      Period: 60
       EvaluationPeriods: 1
-      Threshold: 80
+      Threshold: 70
       ComparisonOperator: GreaterThanOrEqualToThreshold
       AlarmActions:
         - !Ref CloudWatchSNS
@@ -220,6 +273,14 @@ Outputs:
   SecurityGroupId:
     Description: ID of the Security Group
     Value: !Ref FlaskAppSecurityGroup
+
+  ECSAutoScalingRoleARN:
+    Description: ARN of the Auto Scaling Role
+    Value: !GetAtt ECSAutoScalingRole.Arn
+
+  ECSScalingPolicyName:
+    Description: Name of the ECS CPU Scaling Policy
+    Value: !Ref ECSServiceCPUScalingPolicy
 
   LogGroupName:
     Description: Name of the CloudWatch Log Group
