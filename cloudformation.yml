@@ -156,29 +156,6 @@ Resources:
                   - cloudwatch:DeleteAlarms
                 Resource: "*"
 
-  ECSServiceScalingTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    Properties:
-      MaxCapacity: 10 # Maximum number of tasks
-      MinCapacity: 2 # Minimum number of tasks
-      ResourceId: !Sub "service/${FlaskAppCluster}/${FlaskAppService}"
-      RoleARN: !GetAtt ECSAutoScalingRole.Arn
-      ScalableDimension: ecs:service:DesiredCount
-      ServiceNamespace: ecs
-
-  ECSServiceCPUScalingPolicy:
-    Type: AWS::ApplicationAutoScaling::ScalingPolicy
-    Properties:
-      PolicyName: ECSServiceCPUScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ECSServiceScalingTarget
-      TargetTrackingScalingPolicyConfiguration:
-        PredefinedMetricSpecification:
-          PredefinedMetricType: ECSServiceAverageCPUUtilization
-        TargetValue: 70 # Target average CPU utilization (70%)
-        ScaleInCooldown: 60 # Cooldown time (seconds) before scaling in
-        ScaleOutCooldown: 60 # Cooldown time (seconds) before scaling out
-
   # ECS Cluster
   FlaskAppCluster:
     Type: AWS::ECS::Cluster
@@ -221,6 +198,30 @@ Resources:
           SecurityGroups:
             - !Ref FlaskAppSecurityGroup
           AssignPublicIp: ENABLED
+
+  ECSServiceScalingTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: FlaskAppService
+    Properties:
+      MaxCapacity: 10 # Maximum number of tasks
+      MinCapacity: 2 # Minimum number of tasks
+      ResourceId: !Sub "service/${FlaskAppCluster}/${FlaskAppService}"
+      RoleARN: !GetAtt ECSAutoScalingRole.Arn
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+
+  ECSServiceCPUScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: ECSServiceCPUScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref ECSServiceScalingTarget
+      TargetTrackingScalingPolicyConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ECSServiceAverageCPUUtilization
+        TargetValue: 70 # Target average CPU utilization (70%)
+        ScaleInCooldown: 60 # Cooldown time (seconds) before scaling in
+        ScaleOutCooldown: 60 # Cooldown time (seconds) before scaling out
 
  # CloudWatch Log Group
   FlaskAppLogGroup:
