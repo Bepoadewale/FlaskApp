@@ -8,7 +8,7 @@ on:
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   STACK_NAME: flaskapp-stack
-  ECR_REPOSITORY_NAME: ${{ secrets.ECR_REPOSITORY }}
+  ECR_REPOSITORY_NAME: zayzoon
 
 jobs:
   deploy:
@@ -29,15 +29,19 @@ jobs:
         run: |
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
+      - name: Create ECR repository    
+        run:   
+          aws ecr create-repository --repository-name zayzoon
+    
       - name: Build and Push Docker Image
         run: |
-          IMAGE_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest"
+          IMAGE_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/zayzoon:latest"
           docker build -t $IMAGE_URI .
           docker push $IMAGE_URI
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }} 
+          ECR_REPOSITORY: zayzoon
 
       - name: Deploy CloudFormation Stack
         run: |
@@ -48,7 +52,7 @@ jobs:
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          ECR_REPOSITORY: zayzoon
 
       - name: Update ECS Service
         run: |
