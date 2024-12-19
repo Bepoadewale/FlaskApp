@@ -27,6 +27,5 @@ The GitHub Actions workflow and CloudFormation stack will create:
 
 CleanUp Procedure
 
-aws cloudformation delete-stack --stack-name flaskapp-stack
-
-aws ecr delete-repository --repository-name zayzoon
+`aws cloudformation delete-stack --stack-name flaskapp-stack
+aws ecr delete-repository --repository-name zayzoon`
