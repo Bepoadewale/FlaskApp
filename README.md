@@ -1,13 +1,13 @@
 Deployment of a containerized Python Flask App on ECS Fargate
 
 Prerequisites
+
 1. Tools - AWS CLI, GitHub, and Docker.
 2. Input secrets into the GitHub repository's secrets (aws secret access key, aws access key id, aws region, aws account id).
 3. Push the code (git push).
 
 What is Running Here
 
-The GitHub Actions workflow and CloudFormation stack will create:
 1. ECS Cluster
 2. ECS Service
 3. VPC
@@ -23,9 +23,3 @@ The GitHub Actions workflow and CloudFormation stack will create:
 13. ECS Scaling Policy
 14. ECR repository named "zayzoon"
 15. A docker image in the ECR repo
-
-
-CleanUp Procedure
-
-`aws cloudformation delete-stack --stack-name flaskapp-stack
-aws ecr delete-repository --repository-name zayzoon`
