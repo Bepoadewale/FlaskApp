@@ -21,5 +21,5 @@ What is Running Here
 11. Internet Gateway 
 12. ECS Scaling Target
 13. ECS Scaling Policy
-14. ECR repository named "zayzoon"
+14. ECR repository named "flaskapp-repo"
 15. A docker image in the ECR repo
