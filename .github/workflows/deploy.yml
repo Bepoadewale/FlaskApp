@@ -36,7 +36,7 @@ jobs:
           else
             echo "Repository $ECR_REPOSITORY_NAME already exists, continuing..."
           fi
-        env:
+        env: 
           ECR_REPOSITORY: $ECR_REPOSITORY_NAME            
 
       - name: Build and Push the Docker Image

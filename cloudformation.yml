@@ -263,7 +263,7 @@ Resources:
       TopicName: FlaskAppAlarms
       Subscription:
         - Protocol: email
-          Endpoint: coginni@gmail.com 
+          Endpoint: bepoadewale1@gmail.com
 
 Outputs:
   VpcId:

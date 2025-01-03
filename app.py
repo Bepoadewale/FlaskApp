@@ -6,7 +6,7 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     return jsonify({
-        "message": "Adewale does little magic!",
+        "message": "Adewale does some magic!",
         "timestamp": int(time.time())
     })
 
